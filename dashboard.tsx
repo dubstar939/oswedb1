@@ -60,7 +60,7 @@ interface TodoItem {
   id: string
   text: string
   completed: boolean
-  createdAt: Date
+  createdAt: string // Changed to string for JSON serialization
 }
 
 interface CallLog {
@@ -68,7 +68,7 @@ interface CallLog {
   callerName: string
   phone: string
   notes: string
-  timestamp: Date
+  timestamp: string // Changed to string for JSON serialization
 }
 
 interface Project {
@@ -81,7 +81,46 @@ interface Announcement {
   id: string
   title: string
   content: string
-  date: Date
+  date: string // Changed to string for JSON serialization
+}
+
+// --- CUSTOM HOOK FOR LOCAL STORAGE ---
+// This hook handles SSR safety and Hydration correctly for Next.js
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+  // 1. Initialize state with the initial value.
+  // This ensures the server and client match on the first render (No Hydration Error).
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+
+  // 2. Hydrate: Read from localStorage ONLY on the client after mount.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const item = window.localStorage.getItem(key);
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
+    } catch (error) {
+      console.error(`Error reading localStorage key “${key}”:`, error);
+    }
+  }, [key]);
+
+  // 3. Persist: Update localStorage whenever state changes.
+  // We wrap the setter to handle the side effect.
+  const setValue = (value: T | ((prev: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
+    } catch (error) {
+      console.error(`Error setting localStorage key “${key}”:`, error);
+    }
+  };
+
+  return [storedValue, setValue];
 }
 
 // US Timezone data
@@ -133,29 +172,33 @@ const PROJECT_COLORS = [
 ]
 
 export default function Dashboard() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark")
+  // --- STATE WITH PERSISTENCE ---
+  // Replaced useState with useLocalStorage for all persistent data
+  
+  const [theme, setTheme] = useLocalStorage<"dark" | "light">("oswe-theme", "dark")
+  
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isLoading, setIsLoading] = useState(true)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   
-  // Todo state
-  const [todos, setTodos] = useState<TodoItem[]>([
-    { id: "1", text: "Review project documentation", completed: false, createdAt: new Date() },
-    { id: "2", text: "Schedule team meeting", completed: true, createdAt: new Date() },
-    { id: "3", text: "Update client presentation", completed: false, createdAt: new Date() },
+  // Todo state (Persisted)
+  const [todos, setTodos] = useLocalStorage<TodoItem[]>("oswe-todos", [
+    { id: "1", text: "Review project documentation", completed: false, createdAt: new Date().toISOString() },
+    { id: "2", text: "Schedule team meeting", completed: true, createdAt: new Date().toISOString() },
+    { id: "3", text: "Update client presentation", completed: false, createdAt: new Date().toISOString() },
   ])
   const [newTodo, setNewTodo] = useState("")
   
-  // Call log state
-  const [callLogs, setCallLogs] = useState<CallLog[]>([
-    { id: "1", callerName: "John Smith", phone: "555-0123", notes: "Discussed project timeline", timestamp: new Date() },
-    { id: "2", callerName: "Sarah Johnson", phone: "555-0456", notes: "Follow up on proposal", timestamp: new Date(Date.now() - 3600000) },
+  // Call log state (Persisted)
+  const [callLogs, setCallLogs] = useLocalStorage<CallLog[]>("oswe-calls", [
+    { id: "1", callerName: "John Smith", phone: "555-0123", notes: "Discussed project timeline", timestamp: new Date().toISOString() },
+    { id: "2", callerName: "Sarah Johnson", phone: "555-0456", notes: "Follow up on proposal", timestamp: new Date(Date.now() - 3600000).toISOString() },
   ])
   const [newCall, setNewCall] = useState({ callerName: "", phone: "", notes: "" })
   
-  // Projects state
-  const [projects, setProjects] = useState<Project[]>([
+  // Projects state (Persisted)
+  const [projects, setProjects] = useLocalStorage<Project[]>("oswe-projects", [
     { id: "1", name: "Website Redesign", color: "bg-cyan-500" },
     { id: "2", name: "Mobile App", color: "bg-emerald-500" },
     { id: "3", name: "Marketing Campaign", color: "bg-amber-500" },
@@ -164,22 +207,22 @@ export default function Dashboard() {
   const [editingProject, setEditingProject] = useState<string | null>(null)
   const [newProjectName, setNewProjectName] = useState("")
   
-  // Announcements state
-  const [announcements, setAnnouncements] = useState<Announcement[]>([
-    { id: "1", title: "System Maintenance", content: "Scheduled maintenance this weekend", date: new Date() },
-    { id: "2", title: "Team Meeting", content: "Weekly sync at 10 AM Monday", date: new Date() },
+  // Announcements state (Persisted)
+  const [announcements, setAnnouncements] = useLocalStorage<Announcement[]>("oswe-announcements", [
+    { id: "1", title: "System Maintenance", content: "Scheduled maintenance this weekend", date: new Date().toISOString() },
+    { id: "2", title: "Team Meeting", content: "Weekly sync at 10 AM Monday", date: new Date().toISOString() },
   ])
   const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "" })
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false)
   
-  // Radio state
+  // Radio state (Not persisted - usually transient)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState([75])
   const [currentStation, setCurrentStation] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   
-  // Calculator state
+  // Calculator state (Not persisted - usually transient)
   const [calcDisplay, setCalcDisplay] = useState("0")
   const [calcPrevValue, setCalcPrevValue] = useState<number | null>(null)
   const [calcOperation, setCalcOperation] = useState<string | null>(null)
@@ -338,7 +381,7 @@ export default function Dashboard() {
   // Todo functions
   const addTodo = () => {
     if (newTodo.trim()) {
-      setTodos([...todos, { id: Date.now().toString(), text: newTodo, completed: false, createdAt: new Date() }])
+      setTodos([...todos, { id: Date.now().toString(), text: newTodo, completed: false, createdAt: new Date().toISOString() }])
       setNewTodo("")
     }
   }
@@ -354,7 +397,7 @@ export default function Dashboard() {
   // Call log functions
   const addCallLog = () => {
     if (newCall.callerName.trim()) {
-      setCallLogs([{ id: Date.now().toString(), ...newCall, timestamp: new Date() }, ...callLogs])
+      setCallLogs([{ id: Date.now().toString(), ...newCall, timestamp: new Date().toISOString() }, ...callLogs])
       setNewCall({ callerName: "", phone: "", notes: "" })
     }
   }
@@ -371,7 +414,7 @@ export default function Dashboard() {
   const addAnnouncement = () => {
     if (newAnnouncement.title.trim() && newAnnouncement.content.trim()) {
       setAnnouncements([
-        { id: Date.now().toString(), title: newAnnouncement.title, content: newAnnouncement.content, date: new Date() },
+        { id: Date.now().toString(), title: newAnnouncement.title, content: newAnnouncement.content, date: new Date().toISOString() },
         ...announcements
       ])
       setNewAnnouncement({ title: "", content: "" })
@@ -714,38 +757,38 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </ScrollArea>
-<Dialog open={showAnnouncementModal} onOpenChange={setShowAnnouncementModal}>
-                <DialogTrigger asChild>
-                  <Button className="w-full mt-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs h-8">
-                    <Plus className="h-3 w-3 mr-1" /> Add Announcement
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-slate-700">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">New Announcement</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-3">
-                    <Input 
-                      placeholder="Title" 
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-400" 
-                      value={newAnnouncement.title}
-                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                    />
-                    <Textarea 
-                      placeholder="Content" 
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-400" 
-                      value={newAnnouncement.content}
-                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
-                    />
-                    <Button 
-                      className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-                      onClick={addAnnouncement}
-                    >
-                      Post Announcement
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  <Dialog open={showAnnouncementModal} onOpenChange={setShowAnnouncementModal}>
+                    <DialogTrigger asChild>
+                      <Button className="w-full mt-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs h-8">
+                        <Plus className="h-3 w-3 mr-1" /> Add Announcement
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-900 border-slate-700">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">New Announcement</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        <Input 
+                          placeholder="Title" 
+                          className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-400" 
+                          value={newAnnouncement.title}
+                          onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                        />
+                        <Textarea 
+                          placeholder="Content" 
+                          className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-400" 
+                          value={newAnnouncement.content}
+                          onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
+                        />
+                        <Button 
+                          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
+                          onClick={addAnnouncement}
+                        >
+                          Post Announcement
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             </div>
@@ -864,7 +907,10 @@ export default function Dashboard() {
                         </div>
                         <div className="text-right">
                           <div className="text-xs text-slate-400">{log.notes}</div>
-                          <div className="text-xs text-slate-500">{log.timestamp.toLocaleTimeString()}</div>
+                          {/* Fix: Handle date strings safely */}
+                          <div className="text-xs text-slate-500">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </div>
                         </div>
                       </div>
                     ))}
