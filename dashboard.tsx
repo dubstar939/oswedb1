@@ -149,7 +149,11 @@ const RADIO_STATIONS = [
   { name: "Lo-Fi Beats", genre: "Lo-Fi", url: "https://streams.ilovemusic.de/iloveradio17.mp3" },
   { name: "Chill Hop", genre: "Chill", url: "https://streams.ilovemusic.de/iloveradio17.mp3" },
   { name: "Dubstep", genre: "Electronic", url: "https://www.1.fm/tunestream/dubstep/listen.pls" },
-  { name: "Dubstep", genre: "Electronic", url: "https://technobeatz.stream.laut.fm/technobeatz" },
+  { name: "Dubstep2", genre: "Electronic", url: "https://technobeatz.stream.laut.fm/technobeatz" },
+  { name: "Sports", genre: "Sports", url: "http://api.spreaker.com/listen/show/948987/episode/latest/shoutcast" },
+  { name: "Sports2", genre: "Sports", url: "https://play.radioking.io/radio-sports-fr/243262" },
+  { name: "Sports2", genre: "Sports", url: "https://play.radioking.io/radio-sports-fr/243262" },
+  { name: "News", genre: "News", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
 ]
 
 // News headlines
