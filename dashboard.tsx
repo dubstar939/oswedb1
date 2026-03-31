@@ -148,6 +148,8 @@ const RADIO_STATIONS = [
   { name: "Smooth Jazz", genre: "Smooth Jazz", url: "https://stream.jazzfm.ro/smoothjazz.mp3" },
   { name: "Lo-Fi Beats", genre: "Lo-Fi", url: "https://streams.ilovemusic.de/iloveradio17.mp3" },
   { name: "Chill Hop", genre: "Chill", url: "https://streams.ilovemusic.de/iloveradio17.mp3" },
+  { name: "Dubstep", genre: "Electronic", url: "https://www.1.fm/tunestream/dubstep/listen.pls" },
+  { name: "Dubstep", genre: "Electronic", url: "https://technobeatz.stream.laut.fm/technobeatz" },
 ]
 
 // News headlines
