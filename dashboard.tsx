@@ -154,6 +154,9 @@ const RADIO_STATIONS = [
   { name: "Sports2", genre: "Sports", url: "https://play.radioking.io/radio-sports-fr/243262" },
   { name: "Sports2", genre: "Sports", url: "https://play.radioking.io/radio-sports-fr/243262" },
   { name: "News", genre: "News", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
+   { name: "News", genre: "Focus", url: "https://codingfm.stream.laut.fm/codingfm" },
+ { name: "Electronic", genre: "electronic", url: "http://streams.fluxfm.de/electronicbeats/mp3-320/play.m3u" },
+   { name: "Electronic2", genre: "electronic2", url: "https://listen.radioexpresolatino.com/radiomixes" },
 ]
 
 // News headlines
