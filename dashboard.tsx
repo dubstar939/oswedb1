@@ -155,7 +155,7 @@ const RADIO_STATIONS = [
    { name: "Electronic2", genre: "electronic2", url: "https://listen.radioexpresolatino.com/radiomixes" },
   { name: "News", genre: "News", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
    { name: "Focus", genre: "Focus", url: "https://codingfm.stream.laut.fm/codingfm" },
- { name: "Electronic", genre: "electronic", url: "http://streams.fluxfm.de/electronicbeats/mp3-320/play.m3u" },
+ 
 
 ]
 
