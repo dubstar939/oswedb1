@@ -183,7 +183,7 @@ const PROJECT_COLORS = [
 export default function Dashboard() {
   // --- STATE WITH PERSISTENCE ---
   // Replaced useState with useLocalStorage for all persistent data
-  
+  <iframe width="1188" height="668" src="https://www.youtube.com/embed/xRglZIqWYVY" title="Coding Station | Dark Subway Cyberpunk Programming Music" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   const [theme, setTheme] = useLocalStorage<"dark" | "light">("oswe-theme", "dark")
   
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -1092,3 +1092,4 @@ export default function Dashboard() {
     </div>
   )
 }
+<iframe width="1188" height="668" src="https://www.youtube.com/embed/xRglZIqWYVY" title="Coding Station | Dark Subway Cyberpunk Programming Music" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
